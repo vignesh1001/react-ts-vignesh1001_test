@@ -20,6 +20,18 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import clsx from 'clsx';
 
+function a11yProps(index) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`
+  };
+}
+function a11yPropss(index) {
+  return {
+    id: `sub-simple-tab-${index}`,
+    'aria-controls': `sub-simple-tabpanel-${index}`
+  };
+}
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
   return (
@@ -59,27 +71,336 @@ function SubTabPanel(props) {
   );
 }
 
-function Profile({
-  a11yProps,
-  a11yPropss,
-  tabValue: value,
-  handleTabChange: handleChange,
-  defaultClasses: classes,
-  subValue,
-  general,
-  handleChangeSub,
-  handleChangeGeneral,
-  handleChangePasswordSubmit,
-  handleGeneralSubmit,
-  changePassword,
-  handleChangePassword,
-  handleClickShowPasswordCP,
-  handleClickShowPasswordDA,
-  handleMouseDownPassword,
-  deleteAccount,
-  handleChangeDeleteAccount,
-  handleDeleteAccountSubmit
-}) {
+function Profile({ classes, deleteAccount }) {
+  const [general, setGeneral] = React.useState({
+    name: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'Name cannot be blank.'
+    },
+    lastName: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'Last name cannot be blank.'
+    },
+    title: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Title cannot be blank.'
+    },
+    gender: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Gender cannot be blank.'
+    },
+    street: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Street cannot be blank.'
+    },
+    zip: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Zip cannot be blank.'
+    },
+    city: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'City cannot be blank.'
+    },
+    country: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Country cannot be blank.'
+    },
+    state: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'State cannot be blank.'
+    },
+    birthday: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Birthday cannot be blank.'
+    },
+    hideYearInProfile: {
+      value: false,
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Hide year in profile cannot be blank.'
+    },
+    about: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'About cannot be blank.'
+    },
+    phonePrivate: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Phone Private cannot be blank.'
+    },
+    phoneWork: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Phone Work cannot be blank.'
+    },
+    mobile: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Mobile cannot be blank.'
+    },
+    fax: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Fax cannot be blank.'
+    },
+    skypeNickname: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Skype Nickname cannot be blank.'
+    },
+    xmppJabberAddress: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'XMPP Jabber Address cannot be blank.'
+    },
+    url: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Url cannot be blank.'
+    },
+    facebookUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Facebook URL cannot be blank.'
+    },
+    linkedinUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'LinkedIn URL cannot be blank.'
+    },
+    xingUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Xing URL cannot be blank.'
+    },
+    youtubeUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Youtube URL cannot be blank.'
+    },
+    vimeoUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Vimeo URL cannot be blank.'
+    },
+    flickrUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Flickr URL cannot be blank.'
+    },
+    myspaceUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'MySpace URL cannot be blank.'
+    },
+    twitterUrl: {
+      value: '',
+      validation: false,
+      show: false,
+      isError: false,
+      errorMsg: 'Twitter URL cannot be blank.'
+    }
+  });
+  const [changePassword, setChangePassword] = React.useState({
+    createPassword: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'Current Password cannot be blank.'
+    },
+    newPassword: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'New password cannot be blank.'
+    },
+    confirmNewPassword: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'Confirm new password cannot be blank.'
+    }
+  });
+  const [deleteAccount, setDeleteAccount] = React.useState({
+    password: {
+      value: '',
+      validation: true,
+      show: false,
+      isError: false,
+      errorMsg: 'Your password cannot be blank.'
+    }
+  });
+  const [value, setValue] = React.useState(0);
+  const [subValue, setSubValue] = React.useState(0);
+
+  const handleChangeGeneral = prop => event => {
+    let Obj = general[prop];
+    if (event.target.type == 'checkbox') {
+      Obj['value'] = event.target.checked;
+    } else {
+      Obj['value'] = event.target.value;
+    }
+    setGeneral({ ...general, [prop]: Obj });
+  };
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const handleChangeSub = (event, newValue) => {
+    setSubValue(newValue);
+  };
+
+  const handleGeneralSubmit = () => event => {
+    let isError = false;
+    Object.keys(general).map(function(key, index) {
+      let Obj = general[key];
+      if (Obj.validation && Obj.value == '') {
+        Obj['isError'] = true;
+        isError = true;
+      } else {
+        Obj['isError'] = false;
+      }
+      setGeneral({ ...general, [key]: Obj });
+    });
+    if (isError) {
+      console.log('Error: Fill required inputs');
+      return false;
+    }
+    console.log(general);
+  };
+
+  const handleChangePassword = prop => event => {
+    let Obj = changePassword[prop];
+    Obj['value'] = event.target.value;
+    setChangePassword({ ...changePassword, [prop]: Obj });
+  };
+
+  const handleClickShowPasswordCP = prop => event => {
+    let Obj = changePassword[prop];
+    Obj['show'] = !Obj['show'];
+    setChangePassword({ ...changePassword, [prop]: Obj });
+  };
+
+  const handleClickShowPasswordDA = () => {
+    let Obj = deleteAccount['password'];
+    Obj['show'] = !Obj['show'];
+    setDeleteAccount({ ...deleteAccount, ['password']: Obj });
+  };
+
+  const handleChangePasswordSubmit = () => event => {
+    let isError = false;
+    Object.keys(changePassword).map(function(key, index) {
+      let Obj = changePassword[key];
+      if (Obj.validation && Obj.value == '') {
+        Obj['isError'] = true;
+        isError = true;
+      } else {
+        Obj['isError'] = false;
+      }
+      setChangePassword({ ...changePassword, [key]: Obj });
+    });
+    if (isError) {
+      console.log('Error: Fill required inputs');
+      return false;
+    }
+    console.log(changePassword);
+  };
+
+  const handleMouseDownPassword = event => {
+    event.preventDefault();
+  };
+
+  const handleChangeDeleteAccount = prop => event => {
+    let Obj = deleteAccount[prop];
+    Obj['value'] = event.target.value;
+    setDeleteAccount({ ...deleteAccount, [prop]: Obj });
+  };
+
+  const handleDeleteAccountSubmit = () => event => {
+    let isError = false;
+    Object.keys(deleteAccount).map(function(key, index) {
+      let Obj = deleteAccount[key];
+      if (Obj.validation && Obj.value == '') {
+        Obj['isError'] = true;
+        isError = true;
+      } else {
+        Obj['isError'] = false;
+      }
+      setDeleteAccount({ ...deleteAccount, [key]: Obj });
+    });
+    if (isError) {
+      console.log('Error: Fill required inputs');
+      return false;
+    }
+    console.log(deleteAccount);
+  };
+
   return (
     <>
       <div className={classes.panelHeading}>
