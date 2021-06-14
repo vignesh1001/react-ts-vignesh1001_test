@@ -1,6 +1,4 @@
 import {
-  Button,
-  FormControl,
   TableContainer,
   Table,
   TableBody,
@@ -14,9 +12,11 @@ import {
   Tab,
   Tabs,
   Box,
-  Typography
+  Typography,
+  Paper
 } from '@material-ui/core';
 import clsx from 'clsx';
+import axios from 'axios';
 
 function SecuritySetTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -45,7 +45,7 @@ function a11yPropsSecuritySettings(index) {
   };
 }
 
-function SecuritySettings({ classes }) {
+const SecuritySettings = ({ classes }) => {
   const [securitySettings, setSecuritySettings] = React.useState({
     YFReceivePrivateMessage: {
       value: 'default',
@@ -106,19 +106,235 @@ function SecuritySettings({ classes }) {
   });
   const [securitySettingsValue, setSecuritySettingsValue] = React.useState(1);
 
-  const handleChangeSecuritySettings = prop => event => {
+  React.useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/getProfileSecuritySettings`, {
+        headers: { Authorization: `Bearer ${props.token}` }
+      })
+      .then(response => {
+        const { default_permission, permission_list } = response;
+
+        securitySettings.OUCreatePost.value = '2';
+        securitySettings.OUReceivePrivateMessage.value = '2';
+        securitySettings.NRUCreatePost.value = '2';
+        securitySettings.NRUViewYourAboutPage.value = '2';
+
+        if (default_permission.u_user) {
+          if (
+            default_permission.u_user[
+              'humhub\\modules\\post\\permissions\\CreatePost'
+            ]
+          ) {
+            const value =
+              default_permission.u_user[
+                'humhub\\modules\\post\\permissions\\CreatePost'
+              ];
+            if (value === 0 || value === '0') {
+              securitySettings.OUCreatePost.value = '2';
+            } else if (value === 1 || value === '1') {
+              securitySettings.OUCreatePost.value = '3';
+            }
+          } else if (
+            default_permission.u_user[
+              'humhub\\modules\\user\\permissions\\ViewAboutPage'
+            ]
+          ) {
+            const value =
+              default_permission.u_user[
+                'humhub\\modules\\user\\permissions\\ViewAboutPage'
+              ];
+            if (value === 0 || value === '0') {
+              securitySettings.OUViewYourAboutPage.value = '2';
+            } else if (value === 1 || value === '1') {
+              securitySettings.OUViewYourAboutPage.value = '3';
+            }
+          }
+        }
+        if (default_permission.u_guest) {
+          if (
+            default_permission.u_guest[
+              'humhub\\modules\\post\\permissions\\CreatePost'
+            ]
+          ) {
+            const value =
+              default_permission.u_guest[
+                'humhub\\modules\\post\\permissions\\CreatePost'
+              ];
+            if (value === 0 || value === '0') {
+              securitySettings.NRUCreatePost.value = '2';
+            } else if (value === 1 || value === '1') {
+              securitySettings.NRUCreatePost.value = '3';
+            }
+          } else if (
+            default_permission.u_guest[
+              'humhub\\modules\\user\\permissions\\ViewAboutPage'
+            ]
+          ) {
+            const value =
+              default_permission.u_guest[
+                'humhub\\modules\\user\\permissions\\ViewAboutPage'
+              ];
+            if (value === 0 || value === '0') {
+              securitySettings.NRUViewYourAboutPage.value = '2';
+            } else if (value === 1 || value === '1') {
+              securitySettings.NRUViewYourAboutPage.value = '3';
+            }
+          }
+        }
+        // const DEFAULT_u_user_CreatePost =
+        //   default_permission.u_user[
+        //     'humhub\\modules\\post\\permissions\\CreatePost'
+        //   ];
+
+        // const DEFAULT_u_user_ViewAboutPage =
+        //   default_permission.u_user[
+        //     'humhub\\modules\\user\\permissions\\ViewAboutPage'
+        //   ];
+
+        // const DEFAULT_u_guest_CreatePost =
+        //   default_permission.u_guest[
+        //     'humhub\\modules\\post\\permissions\\CreatePost'
+        //   ];
+
+        // const DEFAULT_u_guest_ViewAboutPage =
+        //   default_permission.u_guest[
+        //     'humhub\\modules\\user\\permissions\\ViewAboutPage'
+        //   ];
+        // securitySettings.OUCreatePost.value = DEFAULT_u_user_CreatePost
+        //   ? DEFAULT_u_user_CreatePost.state + ''
+        //   : '0';
+
+        // securitySettings.OUViewYourAboutPage.value = DEFAULT_u_user_ViewAboutPage
+        //   ? DEFAULT_u_user_ViewAboutPage.state + ''
+        //   : '0';
+
+        // securitySettings.NRUCreatePost.value = DEFAULT_u_guest_CreatePost
+        //   ? DEFAULT_u_guest_CreatePost.state + ''
+        //   : '0';
+        // securitySettings.NRUViewYourAboutPage.value = DEFAULT_u_guest_ViewAboutPage
+        //   ? DEFAULT_u_guest_ViewAboutPage.state + ''
+        //   : '0';
+
+        permission_list.forEach(item => {
+          if (item.group_id === 'u_user') {
+            if (item.module_id === 'post') {
+              securitySettings.OUCreatePost.value = item.state;
+            }
+            if (item.module_id === 'user') {
+              securitySettings.OUViewYourAboutPage.value = item.state;
+            }
+          } else if (item.group_id === 'u_guest') {
+            if (item.module_id === 'post') {
+              securitySettings.NRUCreatePost.value = item.state;
+            }
+            if (item.module_id === 'user') {
+              securitySettings.NRUViewYourAboutPage.value = item.state;
+            }
+          }
+        });
+
+        /*{
+        "permission_list": [
+          {
+            "permission_id": "humhub\\modules\\user\\permissions\\ViewAboutPage",
+            "contentcontainer_id": 1,
+            "group_id": "u_friend",
+            "module_id": "user",
+            "class": "humhub\\modules\\user\\permissions\\ViewAboutPage",
+            "state": 0
+          }
+        ],
+        "default_permission": {
+          "u_friend": {
+            "humhub\\modules\\mail\\permissions\\SendMail": {
+              "module_id": "mail",
+              "state": 1
+            },
+            "humhub\\modules\\post\\permissions\\CreatePost": {
+              "module_id": "post",
+              "state": 1
+            },
+            "humhub\\modules\\user\\permissions\\ViewAboutPage": {
+              "module_id": "user",
+              "state": 1
+            }
+          },
+          "u_user": {
+            "humhub\\modules\\mail\\permissions\\SendMail": {
+              "module_id": "mail",
+              "state": 1
+            },
+            "humhub\\modules\\post\\permissions\\CreatePost": {
+              "module_id": "post",
+              "state": 1
+            },
+            "humhub\\modules\\user\\permissions\\ViewAboutPage": {
+              "module_id": "user",
+              "state": 1
+            }
+          },
+          "u_guest": {
+            "humhub\\modules\\user\\permissions\\ViewAboutPage": {
+              "module_id": "user",
+              "state": 0
+            }
+          }
+        }
+      }
+      */
+      });
+  }, []);
+  const handleChangeSecuritySettings = (
+    prop,
+    groupId,
+    moduleId,
+    permissionId
+  ) => event => {
     let Obj = securitySettings[prop];
-    if (event.target.type == 'checkbox') {
+    if (event.target.type === 'checkbox') {
       Obj['value'] = event.target.checked;
     } else {
       Obj['value'] = event.target.value;
     }
     setSecuritySettings({ ...securitySettings, [prop]: Obj });
+    const state = Obj['value'];
+    axios
+      .post(
+        `${process.env.NEXT_PUBLIC_API_URL}/setProfileSecuritySettings`,
+        {
+          groupId,
+          moduleId,
+          permissionId,
+          state: state > 1 ? 2 : state
+        },
+        {
+          headers: { Authorization: `Bearer ${props.token}` }
+        }
+      )
+      .then(response => {}, errorResponse => {});
   };
 
-  const handleSecuritySettingsSubmit = () => event => {
+  /*const handleSecuritySettingsSubmit = () => event => {
+    /*
+      {
+        groupId : u_friend / u_user / u_guest
+        moduleId : mail / post / user
+        permissionId :
+        humhub\modules\mail\permissions\SendMail
+        or
+        humhub\modules\post\permissions\CreatePost
+        or
+        humhub\modules\user\permissions\ViewAboutPage
+        state : 0 / 1
+      }
+    * /
+    axios
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/setProfileSecuritySettings`, {
+        headers: { Authorization: `Bearer ${props.token}` }
+      })
+      .then(response => {}, errorResponse => {});
     console.log(securitySettings);
-  };
+  };*/
 
   const handleChangeSecuritySet = (event, newValue) => {
     setSecuritySettingsValue(newValue);
@@ -136,7 +352,7 @@ function SecuritySettings({ classes }) {
             onChange={handleChangeSecuritySet}
             aria-label="simple tabs example"
           >
-            <Tab label="Your friends" {...a11yPropsSecuritySettings(0)} />
+            {/*<Tab label="Your friends" {...a11yPropsSecuritySettings(0)} />*/}
             <Tab label="Other users" {...a11yPropsSecuritySettings(1)} />
             <Tab
               label="Not registered users"
@@ -144,7 +360,7 @@ function SecuritySettings({ classes }) {
             />
           </Tabs>
         </AppBar>
-        <SecuritySetTabPanel value={securitySettingsValue} index={0}>
+        {/* <SecuritySetTabPanel value={securitySettingsValue} index={0}>
           <div className={classes.tableNotifcRoot}>
             <FormControl className={clsx(classes.margin, classes.textField)}>
               <TableContainer component={Paper}>
@@ -152,24 +368,24 @@ function SecuritySettings({ classes }) {
                   <TableBody>
                     <TableRow>
                       <TableCell component="th" scope="row" align="left">
-                        <strong>Receive private messages </strong>
-                        {'  '}
-                        <span className="badge">MAIL</span> <br /> Allow others
-                        to send you private messages
+                          <strong>Receive private messages </strong>
+                          {'  '}
+                          <span className="badge">MAIL</span> <br /> Allow others
+                          to send you private messages
                       </TableCell>
                       <TableCell align="right">
-                        <Select
-                          labelId="filled-age-native-simple"
-                          id="filled-age-native-simple"
-                          value={securitySettings.YFReceivePrivateMessage.value}
-                          onChange={handleChangeSecuritySettings(
-                            'YFReceivePrivateMessage'
-                          )}
-                        >
-                          <MenuItem value={'default'}>Default - Allow</MenuItem>
-                          <MenuItem value={'0'}>Deny</MenuItem>
-                          <MenuItem value={'1'}>Allow</MenuItem>
-                        </Select>
+                          <Select
+                              labelId="filled-age-native-simple"
+                              id="filled-age-native-simple"
+                              value={securitySettings.YFReceivePrivateMessage.value}
+                              onChange={handleChangeSecuritySettings(
+                                'YFReceivePrivateMessage'
+                              )}
+                          >
+                            <MenuItem value={'default'}>Default - Allow</MenuItem>
+                            <MenuItem value={'0'}>Deny</MenuItem>
+                            <MenuItem value={'1'}>Allow</MenuItem>
+                          </Select>
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -221,36 +437,35 @@ function SecuritySettings({ classes }) {
               </TableContainer>
             </FormControl>
           </div>
-        </SecuritySetTabPanel>
-        <SecuritySetTabPanel value={securitySettingsValue} index={1}>
+        </SecuritySetTabPanel> */}
+        <SecuritySetTabPanel value={securitySettingsValue} index={0}>
           <div className={classes.tableNotifcRoot}>
             <FormControl className={clsx(classes.margin, classes.textField)}>
               <TableContainer component={Paper}>
                 <Table className={classes.table} aria-label="simple table">
                   <TableBody>
-                    <TableRow>
-                      <TableCell component="th" scope="row" align="left">
-                        <strong>Receive private messages</strong>
-                        {'  '}
-                        <span className="badge">MAIL</span> <br /> Allow others
-                        to send you private messages
-                      </TableCell>
-                      <TableCell align="right">
-                        <Select
-                          labelId="filled-age-native-simple"
-                          id="filled-age-native-simple"
-                          value={securitySettings.OUReceivePrivateMessage.value}
-                          onChange={handleChangeSecuritySettings(
-                            'OUReceivePrivateMessage'
-                          )}
-                        >
-                          <MenuItem value={'default'}>Default - Allow</MenuItem>
-                          <MenuItem value={'0'}>Deny</MenuItem>
-                          <MenuItem value={'1'}>Allow</MenuItem>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-
+                    {/*<TableRow>
+                        <TableCell component="th" scope="row" align="left">
+                            <strong>Receive private messages</strong>
+                            {'  '}
+                            <span className="badge">MAIL</span> <br /> Allow others
+                            to send you private messages*
+                        </TableCell>
+                        <TableCell align="right">
+                            <Select
+                                labelId="filled-age-native-simple"
+                                id="filled-age-native-simple"
+                                value={securitySettings.OUReceivePrivateMessage.value}
+                                onChange={handleChangeSecuritySettings(
+                                    'OUReceivePrivateMessage'
+                                )}
+                            >
+                                <MenuItem value={'default'}>Default - Allow</MenuItem>
+                                <MenuItem value={'0'}>Deny</MenuItem>
+                                <MenuItem value={'1'}>Allow</MenuItem>
+                            </Select>
+                        </TableCell>
+                    </TableRow>*/}
                     <TableRow>
                       <TableCell component="th" scope="row" align="left">
                         <strong>Create post</strong>
@@ -264,10 +479,17 @@ function SecuritySettings({ classes }) {
                           id="filled-age-native-simple"
                           value={securitySettings.OUCreatePost.value}
                           onChange={handleChangeSecuritySettings(
-                            'OUCreatePost'
+                            'OUCreatePost',
+                            'u_user',
+                            'post',
+                            'humhub\\modules\\post\\permissions\\CreatePost'
                           )}
                         >
-                          <MenuItem value={'default'}>Default - Allow</MenuItem>
+                          {securitySettings.OUCreatePost.value === '3' ? (
+                            <MenuItem value={'3'}>Default - Allow</MenuItem>
+                          ) : (
+                            <MenuItem value={'4'}>Default - Deny</MenuItem>
+                          )}
                           <MenuItem value={'0'}>Deny</MenuItem>
                           <MenuItem value={'1'}>Allow</MenuItem>
                         </Select>
@@ -286,10 +508,18 @@ function SecuritySettings({ classes }) {
                           id="filled-age-native-simple"
                           value={securitySettings.OUViewYourAboutPage.value}
                           onChange={handleChangeSecuritySettings(
-                            'OUViewYourAboutPage'
+                            'OUViewYourAboutPage',
+                            'u_user',
+                            'user',
+                            'humhub\\modules\\user\\permissions\\ViewAboutPage'
                           )}
                         >
-                          <MenuItem value={'default'}>Default - Allow</MenuItem>
+                          {securitySettings.OUViewYourAboutPage.value ===
+                          '3' ? (
+                            <MenuItem value={'3'}>Default - Allow</MenuItem>
+                          ) : (
+                            <MenuItem value={'4'}>Default - Deny</MenuItem>
+                          )}
                           <MenuItem value={'0'}>Deny</MenuItem>
                           <MenuItem value={'1'}>Allow</MenuItem>
                         </Select>
@@ -301,7 +531,7 @@ function SecuritySettings({ classes }) {
             </FormControl>
           </div>
         </SecuritySetTabPanel>
-        <SecuritySetTabPanel value={securitySettingsValue} index={2}>
+        <SecuritySetTabPanel value={securitySettingsValue} index={1}>
           <div className={classes.tableNotifcRoot}>
             <FormControl className={clsx(classes.margin, classes.textField)}>
               <TableContainer component={Paper}>
@@ -320,10 +550,17 @@ function SecuritySettings({ classes }) {
                           id="filled-age-native-simple"
                           value={securitySettings.NRUCreatePost.value}
                           onChange={handleChangeSecuritySettings(
-                            'NRUCreatePost'
+                            'NRUCreatePost',
+                            'u_guest',
+                            'post',
+                            'humhub\\modules\\post\\permissions\\CreatePost'
                           )}
                         >
-                          <MenuItem value={'default'}>Default - Deny</MenuItem>
+                          {securitySettings.NRUCreatePost.value === '3' ? (
+                            <MenuItem value={'3'}>Default - Allow</MenuItem>
+                          ) : (
+                            <MenuItem value={'4'}>Default - Deny</MenuItem>
+                          )}
                           <MenuItem value={'0'}>Deny</MenuItem>
                           <MenuItem value={'1'}>Allow</MenuItem>
                         </Select>
@@ -342,10 +579,18 @@ function SecuritySettings({ classes }) {
                           id="filled-age-native-simple"
                           value={securitySettings.NRUViewYourAboutPage.value}
                           onChange={handleChangeSecuritySettings(
-                            'NRUViewYourAboutPage'
+                            'NRUViewYourAboutPage',
+                            'u_guest',
+                            'user',
+                            'humhub\\modules\\user\\permissions\\ViewAboutPage'
                           )}
                         >
-                          <MenuItem value={'default'}>Default - Deny</MenuItem>
+                          {securitySettings.NRUViewYourAboutPage.value ===
+                          '3' ? (
+                            <MenuItem value={'3'}>Default - Allow</MenuItem>
+                          ) : (
+                            <MenuItem value={'4'}>Default - Deny</MenuItem>
+                          )}
                           <MenuItem value={'0'}>Deny</MenuItem>
                           <MenuItem value={'1'}>Allow</MenuItem>
                         </Select>
@@ -357,7 +602,7 @@ function SecuritySettings({ classes }) {
             </FormControl>
           </div>
         </SecuritySetTabPanel>
-        <FormControl className={clsx(classes.margin, classes.textField)}>
+        {/* <FormControl className={clsx(classes.margin, classes.textField)}>
           {' '}
           <Button
             className={classes.buttonPrimary}
@@ -366,10 +611,10 @@ function SecuritySettings({ classes }) {
           >
             Save
           </Button>
-        </FormControl>
+        </FormControl> */}
       </div>
     </>
   );
-}
+};
 
 export default SecuritySettings;
