@@ -232,7 +232,7 @@ const SecuritySettings = ({ classes }) => {
             }
           }
         });
-
+        setSecuritySettings({ ...securitySettings });
         /*{
         "permission_list": [
           {
